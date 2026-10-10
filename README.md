@@ -68,22 +68,25 @@ powershell -ExecutionPolicy Bypass -File android\tools\build.ps1 -JvmTest   # �
 ## Windows 单文件 exe
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1                  # 构建
-powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1 -Local -Onedir   # 额外产出兜底变体
+powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1            # 构建
+powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1 -Onedir    # 额外产出目录版兜底
 ```
 
 脚本内部用 `uv` 建 `.venv` 并装 `pyinstaller` + `pillow`，再用
 `pyinstaller --onefile --windowed` / `--onefile --console` 分别打包 GUI 与命令行，
 最后自动跑一遍产物自检。也可以双击 `tools\build_exe.cmd`。
 
-产物：`dist\cbz-editor.exe`（GUI，约 16 MB）、`dist\cbz-tool.exe`（命令行，约 8.8 MB）。
-单文件、自带 Python 运行时与 Tk/Pillow，目标机器**不需要装 Python**，双击即用。
+产物：`dist\cbz-editor.exe`（GUI，约 18 MB）、`dist\cbz-tool.exe`（命令行，约 8.8 MB）、
+`dist\cbz-editor-dir\` 与 `dist\cbz-tool-dir\`（`-Onedir` 时的目录版）。
+单文件版自带 Python 运行时与 Tk/Pillow，目标机器**不需要装 Python**，双击即用。
 
-> **受限环境注意**：PyInstaller 的 onefile 启动时会把自身解压到 `%TEMP%`。
-> 如果那个目录不可写（例如在 DSH 沙箱里跑），会报
-> `Failed to extract VCRUNTIME140.dll ... Permission denied` 并退出。
-> 正常双击运行不受影响；确实遇到时改用 `--runtime-tmpdir .`（解压到 exe 同级目录）
-> 或 `--onedir` 目录版，`dist\` 下已放了这两种变体做对照。
+> **临时目录注意**：onefile 启动时会把自身解压到系统临时目录（`%TMP%`/`%TEMP%`）。
+> 如果那个目录不可写（受限会话/沙箱里会遇到），会报
+> `Could not create temporary directory!` 并直接退出 —— 这不是打包缺陷，
+> 正常双击运行不受影响，也可以在启动前把 `TMP`/`TEMP` 指到可写目录，
+> 或直接改用 `-Onedir` 的目录版（完全不落地临时文件）。
+> 注意**不要**用 `--runtime-tmpdir .` 来绕：实测 GUI 版会因此
+> `ImportError: DLL load failed while importing _tkinter`（`_MEIPASS` 变成相对路径后找不到 tcl DLL）。
 
 ## 目录结构
 
