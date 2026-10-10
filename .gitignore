@@ -1,0 +1,24 @@
+﻿# Python
+__pycache__/
+*.pyc
+.venv/
+build/
+dist/
+
+# 漫画资源与本地产物（体积大，不入库）
+manga/
+*.cbz
+*.cbz.bak
+*.bak
+
+# 临时/探针目录
+_perf-*/
+_probe-*/
+_cbzed_selftest_tmp/
+_e2e/
+_e2e_*/
+
+# Android 构建产物
+android/build/
+android/app/build/
+*.apk.idsig
