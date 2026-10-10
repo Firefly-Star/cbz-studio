@@ -116,6 +116,9 @@ manga/                   测试用漫画包（体积大，已 gitignore）
 
 - **桌面 GUI**：`--selftest` 14 项断言；真实窗口截图核对布局；真实 GUI 保存链路（删 1 + 转 1 + 插 1 → 76 页）产物通过 `zipfile.testzip()`，无重名，`ComicInfo.xml` 的 `PageCount` 自动更新。1651 页 / 70 话的大包：载入 0.09 s、翻页 15 ms/页。
 - **命令行**：增删改查/重排/元数据/重打包均在真实包上跑通，产物无重名、无反斜杠条目。
+- **Windows exe**：四个变体（onefile 与 onedir，GUI 与命令行）实测退出码全为 0 ——
+  `cbz-tool.exe check` 报「未发现问题」，`cbz-editor.exe --selftest` 14 项断言全过（并截图确认窗口渲染正常），
+  用冻结的 exe 解包出的图片经 Pillow 解码验证。
 - **Android**：`CbzDoc` 桌面 JVM 自检 20 项全过，产物再用 Python 版工具独立复核（76 页、4 个章节目录、「未发现问题」）；APK 静态校验：dex 合法、清单含 LAUNCHER、5 种图标密度、`zipalign -c` 通过、v2+v3 签名验证通过、`resources.arsc` 未压缩。
 - **未验证**：Android 端**没有实机/模拟器可跑**（adb 无设备、SDK 未装 emulator），UI 层未做运行时验证。
 
