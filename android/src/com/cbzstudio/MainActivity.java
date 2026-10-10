@@ -396,27 +396,58 @@ public class MainActivity extends Activity {
 
     /** file:// 直接就地打开，content:// 先拷到 cacheDir。 */
     private void loadUri(Uri uri) {
-        try {
-            if (dirty && doc != null) {
-                Toast.makeText(this, "之前的改动未保存，已丢弃", Toast.LENGTH_SHORT).show();
+        if (dirty && doc != null) {
+            Toast.makeText(this, "之前的改动未保存，已丢弃", Toast.LENGTH_SHORT).show();
+        }
+        // 大包（几百 MB）拷贝 + 建索引可能要好几秒，放后台线程，免得 ANR
+        final Uri target = uri;
+        setBusy(true);
+        status.setText("正在载入…");
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    final File f = materialize(target);
+                    final CbzDoc d = new CbzDoc(f);
+                    ui.post(new Runnable() {
+                        public void run() {
+                            if (doc != null) {
+                                doc.close();
+                            }
+                            doc = d;
+                            localCbz = f;
+                            cur = 0;
+                            dirty = false;
+                            undoStack.clear();
+                            List<CbzDoc.Page> live = liveList();
+                            if (!live.isEmpty()) {
+                                cur = indexOf(live.get(0));
+                            }
+                            setBusy(false);
+                            showPage();
+                            Toast.makeText(MainActivity.this,
+                                    "已载入 " + live.size() + " 页", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (final Exception e) {
+                    ui.post(new Runnable() {
+                        public void run() {
+                            setBusy(false);
+                            fail("打开失败", e);
+                            updateStatus();
+                        }
+                    });
+                }
             }
-            File f = materialize(uri);
-            if (doc != null) {
-                doc.close();
-            }
-            doc = new CbzDoc(f);
-            localCbz = f;
-            cur = 0;
-            dirty = false;
-            undoStack.clear();
-            List<CbzDoc.Page> live = liveList();
-            if (!live.isEmpty()) {
-                cur = indexOf(live.get(0));
-            }
-            showPage();
-            Toast.makeText(this, "已载入 " + live.size() + " 页", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            fail("打开失败", e);
+        }).start();
+    }
+
+    /** 载入/保存期间把工具条按钮禁用掉，避免并发改到一半的文档。 */
+    private void setBusy(boolean busy) {
+        if (toolbar == null) {
+            return;
+        }
+        for (int i = 0; i < toolbar.getChildCount(); i++) {
+            toolbar.getChildAt(i).setEnabled(!busy);
         }
     }
 
@@ -662,6 +693,7 @@ public class MainActivity extends Activity {
         if (p.deleted) {
             return;
         }
+        final int pos = livePos();          // 记下删除前的位置
         doc.delete(cur);
         dirty = true;
         undoStack.push(new Runnable() {
@@ -669,8 +701,14 @@ public class MainActivity extends Activity {
                 p.deleted = false;
             }
         });
-        int pos = livePos();
-        gotoLive(pos < 0 ? 0 : pos);
+        // 保持阅读位置：停在同一个序号上（此时显示的是被删页的下一页），
+        // 而不是因为 livePos() 找不到当前页就弹回第一页
+        List<CbzDoc.Page> after = liveList();
+        if (after.isEmpty()) {
+            return;
+        }
+        cur = indexOf(after.get(Math.min(Math.max(pos, 0), after.size() - 1)));
+        showPage();
     }
 
     private void undo() {
