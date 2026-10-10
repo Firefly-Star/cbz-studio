@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.pyc
 .venv/
@@ -22,3 +22,10 @@ _e2e_*/
 android/build/
 android/app/build/
 *.apk.idsig
+
+# 签名密钥（构建脚本会自动生成）
+*.keystore
+*.jks
+
+# PyInstaller 中间产物（.spec 保留在 build/ 下，不入库）
+*.manifest

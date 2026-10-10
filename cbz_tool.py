@@ -40,6 +40,14 @@ IMAGE_EXT = {
     ".jpg", ".jpeg", ".jpe", ".png", ".webp", ".gif", ".bmp",
     ".avif", ".jxl", ".tif", ".tiff", ".heic",
 }
+
+# 控制台是 GBK 时，✓ / ✗ 这类非 GBK 字符会让 print 抛 UnicodeEncodeError 直接崩掉，
+# 这里统一放宽成替换字符，而不是让脚本死掉。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(errors="replace")
+    except Exception:
+        pass
 JUNK_NAMES = {"thumbs.db", "desktop.ini", ".ds_store"}
 JUNK_DIRS = ("__MACOSX/",)
 
