@@ -68,11 +68,13 @@ powershell -ExecutionPolicy Bypass -File android\tools\build.ps1 -JvmTest   # �
 ## Windows 单文件 exe
 
 ```powershell
-uv venv .venv --python 3.12
-uv pip install --python .venv\Scripts\python.exe pyinstaller pillow
-.venv\Scripts\pyinstaller.exe --onefile --windowed --name cbz-editor --distpath dist --workpath build --specpath build cbz_editor.py
-.venv\Scripts\pyinstaller.exe --onefile --console  --name cbz-tool   --distpath dist --workpath build --specpath build cbz_tool.py
+powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1                  # 构建
+powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1 -Local -Onedir   # 额外产出兜底变体
 ```
+
+脚本内部用 `uv` 建 `.venv` 并装 `pyinstaller` + `pillow`，再用
+`pyinstaller --onefile --windowed` / `--onefile --console` 分别打包 GUI 与命令行，
+最后自动跑一遍产物自检。也可以双击 `tools\build_exe.cmd`。
 
 产物：`dist\cbz-editor.exe`（GUI，约 16 MB）、`dist\cbz-tool.exe`（命令行，约 8.8 MB）。
 单文件、自带 Python 运行时与 Tk/Pillow，目标机器**不需要装 Python**，双击即用。
@@ -88,6 +90,9 @@ uv pip install --python .venv\Scripts\python.exe pyinstaller pillow
 ```
 cbz_editor.py            桌面 GUI
 cbz_tool.py              命令行工具
+tools/
+  build_exe.ps1          PyInstaller 打包 Windows exe
+  build_exe.cmd          双击打包
 android/
   AndroidManifest.xml
   src/com/cbzstudio/
