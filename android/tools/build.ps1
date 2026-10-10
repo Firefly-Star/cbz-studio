@@ -95,7 +95,7 @@ RunArr "$BT\aapt2.exe" @("compile", "--dir", $resDir, "-o", $resZip)
 Step "2/6 aapt2 link（生成 base.apk + R.java）"
 RunArr "$BT\aapt2.exe" @("link", "-o", $baseApk, "-I", $PLAT,
     "--manifest", $manifest, "-R", $resZip, "--java", $GEN,
-    "--min-sdk-version", "24", "--target-sdk-version", "35",
+    "--min-sdk-version", "24", "--target-sdk-version", "34",
     "--version-code", "1", "--version-name", "1.0", "--auto-add-overlay")
 
 # 3) javac：Android 需要 Java 8 字节码

@@ -74,6 +74,15 @@ uv pip install --python .venv\Scripts\python.exe pyinstaller pillow
 .venv\Scripts\pyinstaller.exe --onefile --console  --name cbz-tool   --distpath dist --workpath build --specpath build cbz_tool.py
 ```
 
+产物：`dist\cbz-editor.exe`（GUI，约 16 MB）、`dist\cbz-tool.exe`（命令行，约 8.8 MB）。
+单文件、自带 Python 运行时与 Tk/Pillow，目标机器**不需要装 Python**，双击即用。
+
+> **受限环境注意**：PyInstaller 的 onefile 启动时会把自身解压到 `%TEMP%`。
+> 如果那个目录不可写（例如在 DSH 沙箱里跑），会报
+> `Failed to extract VCRUNTIME140.dll ... Permission denied` 并退出。
+> 正常双击运行不受影响；确实遇到时改用 `--runtime-tmpdir .`（解压到 exe 同级目录）
+> 或 `--onedir` 目录版，`dist\` 下已放了这两种变体做对照。
+
 ## 目录结构
 
 ```

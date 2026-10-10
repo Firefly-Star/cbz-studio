@@ -42,10 +42,17 @@ powershell -ExecutionPolicy Bypass -File android\tools\build.ps1 -JvmTest   # �
 
 应用不需要任何权限：选文件、导出文件都走系统的文件选择器（SAF）。
 
+## targetSdk 为什么是 34 而不是 35
+
+Android 15（API 35）对 `targetSdk >= 35` 的应用**强制 edge-to-edge**，顶部内容默认会被状态栏压住。
+这个应用没有真机可验证视觉效果，所以选择 `targetSdk 34` 避开这个行为，同时在根布局上加了
+`setFitsSystemWindows(true)` 作为保险。`compileSdk` 仍然是 35（`--Platform android-35`）。
+等你在真机上确认布局没问题，把 `build.ps1` 里的 `--target-sdk-version` 改成 `35` 即可。
+
 ## 代码结构
 
 ```
-AndroidManifest.xml            清单（minSdk 24 / targetSdk 35，无 uses-permission）
+AndroidManifest.xml            清单（minSdk 24 / targetSdk 34，无 uses-permission）
 res/values/strings.xml         应用名
 res/mipmap-*/ic_launcher.png   图标（mdpi~xxxhdpi 五种密度）
 src/com/cbzstudio/

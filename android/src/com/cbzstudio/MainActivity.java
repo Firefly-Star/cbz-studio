@@ -185,6 +185,9 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(C_BG);
+        // 顶部避让状态栏。targetSdk 34 时系统本来就会让出这块区域，
+        // 这一行是保险：万一在强制 edge-to-edge 的新系统上运行，内容不会被状态栏压住。
+        root.setFitsSystemWindows(true);
 
         // 顶部状态栏
         status = new TextView(this);
